@@ -1,4 +1,4 @@
-// Arduino Micro Oric Keyboard Reader.
+// Arduino Micro Commodore Keyboard Reader + HID Device
 
 #include <HID.h>
 #include <Keyboard.h>
