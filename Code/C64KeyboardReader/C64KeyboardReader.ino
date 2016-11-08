@@ -7,23 +7,23 @@
 
 // Using the Simon Inns layout (see Docs/600px-C64_Keyboard_Schematics_PNG.png)
 
-#define PIN_INPUT_COLA   2    // Connector Pin 12
-#define PIN_INPUT_COLB   3    // Connector Pin 11
-#define PIN_INPUT_COLC   4    // Connector Pin 10
-#define PIN_INPUT_COLD   5    // Connector Pin 9
-#define PIN_INPUT_COLE   6    // Connector Pin 8
-#define PIN_INPUT_COLF   7    // Connector Pin 7
-#define PIN_INPUT_COLG   8    // Connector Pin 6
-#define PIN_INPUT_COLH   9    // Connector Pin 5
+#define PIN_INPUT_COLA  2   // Connector Pin 12
+#define PIN_INPUT_COLB  3   // Connector Pin 11
+#define PIN_INPUT_COLC  4   // Connector Pin 10
+#define PIN_INPUT_COLD  5   // Connector Pin 9
+#define PIN_INPUT_COLE  6   // Connector Pin 8
+#define PIN_INPUT_COLF  7   // Connector Pin 7
+#define PIN_INPUT_COLG  8   // Connector Pin 6
+#define PIN_INPUT_COLH  9   // Connector Pin 5
 
-#define PIN_OUTPUT_ROW0  10   // Connector Pin 20
-#define PIN_OUTPUT_ROW1  11   // Connector Pin 19 
-#define PIN_OUTPUT_ROW2  A5   // Connector Pin 18
-#define PIN_OUTPUT_ROW3  A4   // Connector Pin 17
-#define PIN_OUTPUT_ROW4  A3   // Connector Pin 16
-#define PIN_OUTPUT_ROW5  A2   // Connector Pin 15
-#define PIN_OUTPUT_ROW6  A1   // Connector Pin 14
-#define PIN_OUTPUT_ROW7  A0   // Connector Pin 13
+#define  PIN_OUTPUT_ROW0 10   // Connector Pin 20
+#define  PIN_OUTPUT_ROW1 11   // Connector Pin 19 
+#define  PIN_OUTPUT_ROW2 A5   // Connector Pin 18
+#define  PIN_OUTPUT_ROW3 A4   // Connector Pin 17
+#define  PIN_OUTPUT_ROW4 A3   // Connector Pin 16
+#define  PIN_OUTPUT_ROW5 A2   // Connector Pin 15
+#define  PIN_OUTPUT_ROW6 A1   // Connector Pin 14
+#define  PIN_OUTPUT_ROW7 A0   // Connector Pin 13
 
 #define PIN_OUTPUT_LED   13
 
@@ -33,7 +33,7 @@
 
 
 #define NUM_KEYS      65 // To include restore key as virtual key #64
-#define COMMODORE_KEY 47
+#define COMMODORE_KEY 5
 #define RESTORE_KEY   64
 
 // Array of characters
@@ -89,8 +89,6 @@ void setup()
 
   //Keyboard.begin();
   //Keyboard.releaseAll();
-
-  Serial.begin(115200);
 }
 
 void loop()
@@ -149,15 +147,14 @@ void Scan()
   {
     // Set current row to LOW, rest to HIGH
 
-    digitalWrite(PIN_OUTPUT_ROW0, LOW); // (row == 0) ? HIGH : LOW);
-    digitalWrite(PIN_OUTPUT_ROW1, HIGH); // (row == 1) ? HIGH : LOW);
-    digitalWrite(PIN_OUTPUT_ROW2, HIGH); // (row == 2) ? HIGH : LOW);
-    digitalWrite(PIN_OUTPUT_ROW3, HIGH); // (row == 3) ? HIGH : LOW);
-    digitalWrite(PIN_OUTPUT_ROW4, HIGH); // (row == 4) ? HIGH : LOW);
-    digitalWrite(PIN_OUTPUT_ROW5, HIGH); // (row == 5) ? HIGH : LOW);
-    digitalWrite(PIN_OUTPUT_ROW6, HIGH); // (row == 6) ? HIGH : LOW);
-    digitalWrite(PIN_OUTPUT_ROW7, HIGH); // (row == 7) ? HIGH : LOW);
-
+    digitalWrite(PIN_OUTPUT_ROW0, (row == 0) ? LOW : HIGH);
+    digitalWrite(PIN_OUTPUT_ROW1, (row == 1) ? LOW : HIGH);
+    digitalWrite(PIN_OUTPUT_ROW2, (row == 2) ? LOW : HIGH);
+    digitalWrite(PIN_OUTPUT_ROW3, (row == 3) ? LOW : HIGH);
+    digitalWrite(PIN_OUTPUT_ROW4, (row == 4) ? LOW : HIGH);
+    digitalWrite(PIN_OUTPUT_ROW5, (row == 5) ? LOW : HIGH);
+    digitalWrite(PIN_OUTPUT_ROW6, (row == 6) ? LOW : HIGH);
+    digitalWrite(PIN_OUTPUT_ROW7, (row == 7) ? LOW : HIGH);
 
     int offset = (row * 8);
 
