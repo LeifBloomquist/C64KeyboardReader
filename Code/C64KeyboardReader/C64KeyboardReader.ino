@@ -3,25 +3,38 @@
 #include <HID.h>
 #include <Keyboard.h>
 
-#define PIN_INPUT_COL1   2  
-#define PIN_INPUT_COL2   3  
-#define PIN_INPUT_COL3   4  
-#define PIN_INPUT_COL4   5  
-#define PIN_INPUT_COL5   6  
-#define PIN_OUTPUT_C6    7
-#define PIN_OUTPUT_B7    8
-#define PIN_OUTPUT_A8    9
-#define PIN_INPUT_COL9   10  
-#define PIN_INPUT_COL11  11 
-#define PIN_INPUT_COL12  12
+#define PIN_INPUT_RESTORE 12 // Connector Pin 3
+
+// Using the Simon Inns layout (see Docs/600px-C64_Keyboard_Schematics_PNG.png)
+
+#define PIN_INPUT_COLA   2    // Connector Pin 12
+#define PIN_INPUT_COLB   3    // Connector Pin 11
+#define PIN_INPUT_COLC   4    // Connector Pin 10
+#define PIN_INPUT_COLD   5    // Connector Pin 9
+#define PIN_INPUT_COLE   6    // Connector Pin 8
+#define PIN_INPUT_COLF   7    // Connector Pin 7
+#define PIN_INPUT_COLG   8    // Connector Pin 6
+#define PIN_INPUT_COLH   9    // Connector Pin 5
+
+#define PIN_OUTPUT_ROW0  10   // Connector Pin 20
+#define PIN_OUTPUT_ROW1  11   // Connector Pin 19 
+#define PIN_OUTPUT_ROW2  A5   // Connector Pin 18
+#define PIN_OUTPUT_ROW3  A4   // Connector Pin 17
+#define PIN_OUTPUT_ROW4  A3   // Connector Pin 16
+#define PIN_OUTPUT_ROW5  A2   // Connector Pin 15
+#define PIN_OUTPUT_ROW6  A1   // Connector Pin 14
+#define PIN_OUTPUT_ROW7  A0   // Connector Pin 13
+
 #define PIN_OUTPUT_LED   13
 
-// Connector pin 10 to GND
-// Connector pin 13 to GND
-// Connector pin 14 to 5V
+// Connector pin 1 to GND
+// Connector pin 2 is key (no pin)
+// Connector pin 4 is +5V
 
-#define NUM_KEYS 64
-#define FUNCT_KEY 47
+
+#define NUM_KEYS      65 // To include restore key as virtual key #64
+#define COMMODORE_KEY 47
+#define RESTORE_KEY   64
 
 // Array of characters
 // Refer to https://www.arduino.cc/en/Reference/KeyboardModifiers for modifier keys
@@ -41,28 +54,43 @@ bool last_keys[NUM_KEYS] = { 0 };  // Previous state of keyboard matrix, for edg
 void setup()
 {
   // Set pin directions
-  pinMode(PIN_INPUT_COL1,  INPUT_PULLUP);
-  pinMode(PIN_INPUT_COL2,  INPUT_PULLUP);
-  pinMode(PIN_INPUT_COL3,  INPUT_PULLUP);
-  pinMode(PIN_INPUT_COL4,  INPUT_PULLUP);
-  pinMode(PIN_INPUT_COL5,  INPUT_PULLUP);
-  pinMode(PIN_OUTPUT_C6,   OUTPUT);
-  pinMode(PIN_OUTPUT_B7,   OUTPUT);
-  pinMode(PIN_OUTPUT_A8,   OUTPUT);
-  pinMode(PIN_INPUT_COL9,  INPUT_PULLUP);
-  pinMode(PIN_INPUT_COL11, INPUT_PULLUP);
-  pinMode(PIN_INPUT_COL12, INPUT_PULLUP);
+  pinMode(PIN_INPUT_RESTORE, INPUT_PULLUP);
+  pinMode(PIN_INPUT_COLA, INPUT_PULLUP);
+  pinMode(PIN_INPUT_COLB, INPUT_PULLUP);
+  pinMode(PIN_INPUT_COLC, INPUT_PULLUP);
+  pinMode(PIN_INPUT_COLD, INPUT_PULLUP);
+  pinMode(PIN_INPUT_COLE, INPUT_PULLUP);
+  pinMode(PIN_INPUT_COLF, INPUT_PULLUP);
+  pinMode(PIN_INPUT_COLG, INPUT_PULLUP);
+  pinMode(PIN_INPUT_COLH, INPUT_PULLUP);
+
+  pinMode(PIN_OUTPUT_ROW0, OUTPUT);
+  pinMode(PIN_OUTPUT_ROW1, OUTPUT);
+  pinMode(PIN_OUTPUT_ROW2, OUTPUT);
+  pinMode(PIN_OUTPUT_ROW3, OUTPUT);
+  pinMode(PIN_OUTPUT_ROW4, OUTPUT);
+  pinMode(PIN_OUTPUT_ROW5, OUTPUT);
+  pinMode(PIN_OUTPUT_ROW6, OUTPUT);
+  pinMode(PIN_OUTPUT_ROW7, OUTPUT);
+
   pinMode(PIN_OUTPUT_LED,  OUTPUT);
 
   // Set default output states
-  digitalWrite(PIN_OUTPUT_C6, LOW);
-  digitalWrite(PIN_OUTPUT_B7, LOW);
-  digitalWrite(PIN_OUTPUT_A8, LOW);
+  digitalWrite(PIN_OUTPUT_ROW0, HIGH);
+  digitalWrite(PIN_OUTPUT_ROW1, HIGH);
+  digitalWrite(PIN_OUTPUT_ROW2, HIGH);
+  digitalWrite(PIN_OUTPUT_ROW3, HIGH);
+  digitalWrite(PIN_OUTPUT_ROW4, HIGH);
+  digitalWrite(PIN_OUTPUT_ROW5, HIGH);
+  digitalWrite(PIN_OUTPUT_ROW6, HIGH);
+  digitalWrite(PIN_OUTPUT_ROW7, HIGH);
 
   digitalWrite(PIN_OUTPUT_LED, LOW);
 
-  Keyboard.begin();
-  Keyboard.releaseAll();
+  //Keyboard.begin();
+  //Keyboard.releaseAll();
+
+  Serial.begin(115200);
 }
 
 void loop()
@@ -70,27 +98,32 @@ void loop()
   // 1. Scan
   Scan();
 
-  // 1a. FUNCT key is handled specially
-  if (keys[FUNCT_KEY] == 0) 
+  // 2. Commodore key is handled specially
+  if (keys[COMMODORE_KEY] == 0) 
   {
-    HandleFUNCT();   
+  //  HandleCommodoreKey();   
+  }
+  else if (keys[COMMODORE_KEY] == 0)
+  {
+  //  HandleCommodoreKey();
   }
   else
   {
     // 2. Edge detection for normal key handling
     for (int k = 0; k < NUM_KEYS; k++)
     {
-      if (k == FUNCT_KEY) continue;  // Ignore, handled above
+   //   if (k == COMMODORE_KEY) continue;  // Ignore, handled above
 
       if (KeyPressed(k))   // Falling edge
       {
-        Keyboard.press(keycodes[k]);
+        //Keyboard.press(keycodes[k]);
+       // Keyboard.println("Starting");
         digitalWrite(PIN_OUTPUT_LED, HIGH);
       }
 
       if (KeyReleased(k))  // Rising edge
       {
-        Keyboard.release(keycodes[k]);
+      //  Keyboard.release(keycodes[k]);
       }
     }
   }
@@ -99,7 +132,10 @@ void loop()
   for (int k = 0; k < NUM_KEYS; k++)
   {
     last_keys[k] = keys[k];
+
+    Serial.print(keys[k], 16);
   }
+  Serial.println();
 
   // 4. Debounce - a simple delay seems to suffice	 
   delay(10); 
@@ -111,25 +147,31 @@ void Scan()
 {
   for (int row = 0; row <= 7; row++)
   {
-    bool a = bitRead(row, 0);
-    bool b = bitRead(row, 1);
-    bool c = bitRead(row, 2);
+    // Set current row to LOW, rest to HIGH
 
-    digitalWrite(PIN_OUTPUT_A8, a);
-    digitalWrite(PIN_OUTPUT_B7, b);
-    digitalWrite(PIN_OUTPUT_C6, c);
+    digitalWrite(PIN_OUTPUT_ROW0, LOW); // (row == 0) ? HIGH : LOW);
+    digitalWrite(PIN_OUTPUT_ROW1, HIGH); // (row == 1) ? HIGH : LOW);
+    digitalWrite(PIN_OUTPUT_ROW2, HIGH); // (row == 2) ? HIGH : LOW);
+    digitalWrite(PIN_OUTPUT_ROW3, HIGH); // (row == 3) ? HIGH : LOW);
+    digitalWrite(PIN_OUTPUT_ROW4, HIGH); // (row == 4) ? HIGH : LOW);
+    digitalWrite(PIN_OUTPUT_ROW5, HIGH); // (row == 5) ? HIGH : LOW);
+    digitalWrite(PIN_OUTPUT_ROW6, HIGH); // (row == 6) ? HIGH : LOW);
+    digitalWrite(PIN_OUTPUT_ROW7, HIGH); // (row == 7) ? HIGH : LOW);
+
 
     int offset = (row * 8);
 
-    keys[offset + 0] = digitalRead(PIN_INPUT_COL1);
-    keys[offset + 1] = digitalRead(PIN_INPUT_COL2);
-    keys[offset + 2] = digitalRead(PIN_INPUT_COL3);
-    keys[offset + 3] = digitalRead(PIN_INPUT_COL4);
-    keys[offset + 4] = digitalRead(PIN_INPUT_COL5);
-    keys[offset + 5] = digitalRead(PIN_INPUT_COL9);
-    keys[offset + 6] = digitalRead(PIN_INPUT_COL11);
-    keys[offset + 7] = digitalRead(PIN_INPUT_COL12);
+    keys[offset + 0] = digitalRead(PIN_INPUT_COLA);
+    keys[offset + 1] = digitalRead(PIN_INPUT_COLB);
+    keys[offset + 2] = digitalRead(PIN_INPUT_COLC);
+    keys[offset + 3] = digitalRead(PIN_INPUT_COLD);
+    keys[offset + 4] = digitalRead(PIN_INPUT_COLE);
+    keys[offset + 5] = digitalRead(PIN_INPUT_COLF);
+    keys[offset + 6] = digitalRead(PIN_INPUT_COLG);
+    keys[offset + 7] = digitalRead(PIN_INPUT_COLH);
   }
+
+  keys[RESTORE_KEY] = digitalRead(PIN_INPUT_RESTORE);
 }
 
 bool KeyPressed(int k)
@@ -143,7 +185,7 @@ bool KeyReleased(int k)
 }
 
 // Special functions with FUNCT
-void HandleFUNCT()
+void HandleCommodoreKey()
 {
   // For testing, a panic key (FUNCT + H)
   if (KeyPressed(49))
