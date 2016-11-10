@@ -7,30 +7,29 @@
 
 // Using the Simon Inns layout (see Docs/600px-C64_Keyboard_Schematics_PNG.png)
 
-#define PIN_INPUT_COLA  2   // Connector Pin 12
-#define PIN_INPUT_COLB  3   // Connector Pin 11
-#define PIN_INPUT_COLC  4   // Connector Pin 10
-#define PIN_INPUT_COLD  5   // Connector Pin 9
-#define PIN_INPUT_COLE  6   // Connector Pin 8
-#define PIN_INPUT_COLF  7   // Connector Pin 7
-#define PIN_INPUT_COLG  8   // Connector Pin 6
-#define PIN_INPUT_COLH  9   // Connector Pin 5
+#define PIN_INPUT_COLA   2   // Connector Pin 12
+#define PIN_INPUT_COLB   3   // Connector Pin 11
+#define PIN_INPUT_COLC   4   // Connector Pin 10
+#define PIN_INPUT_COLD   5   // Connector Pin 9
+#define PIN_INPUT_COLE   6   // Connector Pin 8
+#define PIN_INPUT_COLF   7   // Connector Pin 7
+#define PIN_INPUT_COLG   8   // Connector Pin 6
+#define PIN_INPUT_COLH   9   // Connector Pin 5
 
-#define  PIN_OUTPUT_ROW0 10   // Connector Pin 20
-#define  PIN_OUTPUT_ROW1 11   // Connector Pin 19 
-#define  PIN_OUTPUT_ROW2 A5   // Connector Pin 18
-#define  PIN_OUTPUT_ROW3 A4   // Connector Pin 17
-#define  PIN_OUTPUT_ROW4 A3   // Connector Pin 16
-#define  PIN_OUTPUT_ROW5 A2   // Connector Pin 15
-#define  PIN_OUTPUT_ROW6 A1   // Connector Pin 14
-#define  PIN_OUTPUT_ROW7 A0   // Connector Pin 13
+#define PIN_OUTPUT_ROW0 10   // Connector Pin 20
+#define PIN_OUTPUT_ROW1 11   // Connector Pin 19 
+#define PIN_OUTPUT_ROW2 A5   // Connector Pin 18
+#define PIN_OUTPUT_ROW3 A4   // Connector Pin 17
+#define PIN_OUTPUT_ROW4 A3   // Connector Pin 16
+#define PIN_OUTPUT_ROW5 A2   // Connector Pin 15
+#define PIN_OUTPUT_ROW6 A1   // Connector Pin 14
+#define PIN_OUTPUT_ROW7 A0   // Connector Pin 13
 
 #define PIN_OUTPUT_LED   13
 
 // Connector pin 1 to GND
 // Connector pin 2 is key (no pin)
 // Connector pin 4 is +5V
-
 
 #define NUM_KEYS      65 // To include restore key as virtual key #64
 #define COMMODORE_KEY 5
@@ -39,14 +38,16 @@
 // Array of characters
 // Refer to https://www.arduino.cc/en/Reference/KeyboardModifiers for modifier keys
 
-char keycodes[NUM_KEYS] = { '7', 'n', '5', 'v', '3', 'x', '1', ' ',                       // R0
-                            'j', 't', 'r', 'f', 'd', 'q', KEY_ESC, ' ',                   // R1
-                            'm', '6', 'b', '4', 'c', '2', 'z', KEY_LEFT_CTRL,             // R2
-                            'k', '9', ';', '-', '\'', '\\', ' ', ' ',                     // R3
-                            ' ', ',', '.', KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW, KEY_LEFT_ARROW, KEY_LEFT_SHIFT,  // R4
-                            'u', 'i', 'o', 'p', '[', ']', KEY_BACKSPACE, KEY_TAB,         // R5  KEY_TAB is FUNCT (handled seperately)
-                            'y', 'h', 'g', 'e', 'w', 's', 'a', ' ',                       // R6
-                            '8', 'l', '0', '/', '=', ' ', KEY_RETURN, KEY_RIGHT_SHIFT };  // R7
+char keycodes[NUM_KEYS] = { '1', '`', KEY_LEFT_CTRL, KEY_ESC, ' ', KEY_LEFT_GUI , 'q', '2', // COLA
+                            '3', 'w', 'a', KEY_LEFT_SHIFT, 'z', 's', 'e', '4',              // COLB
+                            '5', 'r', 'd', 'x', 'c', 'f', 't', '6',                         // COLC
+                            '7', 'y', 'g', 'v', 'b', 'h', 'u', '8',                         // COLD
+                            '9', 'i', 'j', 'n', 'm', 'k', 'o', '0',                         // COLE
+                            '+', 'p', 'l', ',', '.', ':', '@', '-',                         // COLF
+                            '&', '*', ';', '/', KEY_RIGHT_ALT, '=', '^', KEY_HOME,          // COLG 
+                            KEY_BACKSPACE, KEY_RETURN, KEY_RIGHT_ARROW, KEY_DOWN_ARROW,     // COLH
+                            KEY_F1, KEY_F3, KEY_F5, KEY_F7, 
+                            ' ' };                                                          // RESTORE 
 
 bool keys[NUM_KEYS] = { 0 };       // Current state of keyboard matrix
 bool last_keys[NUM_KEYS] = { 0 };  // Previous state of keyboard matrix, for edge detection
@@ -87,8 +88,8 @@ void setup()
 
   digitalWrite(PIN_OUTPUT_LED, LOW);
 
-  //Keyboard.begin();
-  //Keyboard.releaseAll();
+  Keyboard.begin();
+  Keyboard.releaseAll();
 }
 
 void loop()
@@ -99,29 +100,28 @@ void loop()
   // 2. Commodore key is handled specially
   if (keys[COMMODORE_KEY] == 0) 
   {
-  //  HandleCommodoreKey();   
+ //    HandleCommodoreKey();   
   }
-  else if (keys[COMMODORE_KEY] == 0)
+  else if (keys[RESTORE_KEY] == 0)
   {
-  //  HandleCommodoreKey();
+     HandleRestoreKey();
   }
   else
   {
     // 2. Edge detection for normal key handling
     for (int k = 0; k < NUM_KEYS; k++)
     {
-   //   if (k == COMMODORE_KEY) continue;  // Ignore, handled above
+      if (k == RESTORE_KEY) continue;  // Ignore, handled above
 
       if (KeyPressed(k))   // Falling edge
       {
-        //Keyboard.press(keycodes[k]);
-       // Keyboard.println("Starting");
+        Keyboard.press(keycodes[k]);   
         digitalWrite(PIN_OUTPUT_LED, HIGH);
       }
 
       if (KeyReleased(k))  // Rising edge
       {
-      //  Keyboard.release(keycodes[k]);
+        Keyboard.release(keycodes[k]);
       }
     }
   }
@@ -130,10 +130,7 @@ void loop()
   for (int k = 0; k < NUM_KEYS; k++)
   {
     last_keys[k] = keys[k];
-
-    Serial.print(keys[k], 16);
   }
-  Serial.println();
 
   // 4. Debounce - a simple delay seems to suffice	 
   delay(10); 
@@ -181,21 +178,23 @@ bool KeyReleased(int k)
   return ((last_keys[k] == 0) && (keys[k] == 1));
 }
 
-// Special functions with FUNCT
+// Special functions with Commodore Key
 void HandleCommodoreKey()
 {
-  // For testing, a panic key (FUNCT + H)
-  if (KeyPressed(49))
+  // A fun macro (Commodore + Q)
+  if (KeyPressed(6))
   {
-    Keyboard.releaseAll();
-  }
-
-  // A fun macro (FUNCT + Q)
-  if (KeyPressed(13))
-  {
-    Keyboard.print("My hovercraft is full of eels\n");
+     Keyboard.print("My hovercraft is full of eels\n");
+     keys[COMMODORE_KEY] = 1;   // Suppress release event
+     return;
   }
 
   // TODO options for switching keyboard layouts, etc.
 
+}
+
+// Special functions with Restore
+void HandleRestoreKey()
+{
+    Keyboard.releaseAll();
 }
